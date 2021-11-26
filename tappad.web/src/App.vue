@@ -3,7 +3,7 @@
     <NavigationBar/>
     <v-content>
       <ToolBar/>
-      <h1>hello</h1>
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
