@@ -4,38 +4,64 @@
         :mini-variant="this.narrowNavigation"
         mini-variant-width="64"
         permanent
-        color="primary"
+        dark
+        class="navbar"
       >
-        <v-list-item class="px-2 my-2">
-          <v-list-item-title>tappad</v-list-item-title>
+        <v-list-item 
+          >
+          <v-list-item-title class="text-center font-weight-bold title" color="secondary" v-if="this.narrowNavigation">T<span class="title--span">P</span></v-list-item-title>
+          <v-list-item-title class="text-center font-weight-bold title" v-else>T<span class="title--span">APP</span>AD</v-list-item-title>
         </v-list-item>
-        <v-btn
-          icon
-          elevation="3"
-          @click="narrowNavigation=!narrowNavigation">
-          <v-icon v-if="this.narrowNavigation">mdi-chevron-right</v-icon>
-          <v-icon v-else>mdi-chevron-left</v-icon>
-        </v-btn>
           <v-divider></v-divider>
 
           <v-list 
             nav
-            dense>
+            dense
+            rounded>
             <v-list-item
               v-for="page in pages"
               :key="page.title"
               :to="page.path"
               link
+              active-class="active-link"
             >
               <v-list-icon>
-                <v-icon class="pr-2">{{ page.icon }}</v-icon>
+                <v-icon>{{ page.icon }}</v-icon>
               </v-list-icon>
 
               <v-list-item-content>
-                <v-list-item-title>{{ page.title }}</v-list-item-title>
+                <v-list-item-title class="ml-4">{{ page.title }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
+            
+            <v-list-group
+              prepend-icon="mdi-playlist-music">
+              <template v-slot:activator>
+                <v-list-item-title>Rudiments</v-list-item-title>
+              </template>
+                <v-list-item v-for="subpage in rudiments"
+                  :key="subpage.title"
+                  :to="subpage.path"
+                  link
+                  active-class="active-link">
+                  <v-list-icon>
+                    <v-icon>{{ subpage.icon }}</v-icon>
+                  </v-list-icon>
+                  <v-list-item-content>
+                    <v-list-item-title class="ml-4">{{ subpage.title }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+            </v-list-group>
           </v-list>
+          <div>
+        <v-btn
+          class="button"
+          @click="narrowNavigation=!narrowNavigation"
+          block
+          tile>
+          <v-icon>mdi-arrow-left-right-bold</v-icon>
+        </v-btn>
+        </div>
       </v-navigation-drawer>
 </template>
 
@@ -50,7 +76,35 @@
                 {title: 'Metronome', icon: 'mdi-metronome', path: '/metronome'},
                 {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'}
             ],
+            rudiments: [
+              {title: 'Single stroke roll', icon: '', path: '/'},
+              {title: 'Single stroke four', icon: '', path: '/'},
+              {title: 'Double stroke roll', icon: '', path: '/'},
+              {title: 'Triple stroke roll', icon: '', path: '/'},
+            ],
             mini: true,
         })
     };
 </script>
+
+<style lang="scss" scoped>
+  .navbar {
+    background-color: #23374c !important;
+  }
+
+  .title {
+    font-size: 1.25em;
+
+    &--span {
+      color: #dd656e;
+    }
+  }
+
+  .active-link {
+    color: #dd656e !important;
+  }
+
+  .button {
+    background-color: #7785AC !important;
+  }
+</style>
