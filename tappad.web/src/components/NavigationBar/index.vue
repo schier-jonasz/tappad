@@ -35,7 +35,9 @@
             </v-list-item>
             
             <v-list-group
-              prepend-icon="mdi-playlist-music">
+              prepend-icon="mdi-playlist-music"
+              v-model="collapse"
+              @click="checkIfNarrow()">
               <template v-slot:activator>
                 <v-list-item-title>Rudiments</v-list-item-title>
               </template>
@@ -53,14 +55,14 @@
                 </v-list-item>
             </v-list-group>
           </v-list>
-          <div>
-        <v-btn
-          class="button"
-          @click="narrowNavigation=!narrowNavigation"
-          block
-          tile>
-          <v-icon>mdi-arrow-left-right-bold</v-icon>
-        </v-btn>
+        <div>
+          <v-btn
+            class="button"
+            @click="changeWidth()"
+            block
+            tile>
+            <v-icon>mdi-arrow-left-right-bold</v-icon>
+          </v-btn>
         </div>
       </v-navigation-drawer>
 </template>
@@ -71,19 +73,33 @@
         data: () => ({
             navigation: true,
             narrowNavigation: true,
+            collapse: false,
             pages: [
                 {title: 'Home', icon: 'mdi-home-city', path: '/'},
                 {title: 'Metronome', icon: 'mdi-metronome', path: '/metronome'},
                 {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'}
             ],
             rudiments: [
-              {title: 'Single stroke roll', icon: '', path: '/'},
-              {title: 'Single stroke four', icon: '', path: '/'},
-              {title: 'Double stroke roll', icon: '', path: '/'},
-              {title: 'Triple stroke roll', icon: '', path: '/'},
+              {title: 'Single stroke roll', icon: 'mdi-music-note', path: '/rudiments/single-stroke-roll'},
+              {title: 'Single stroke four', icon: 'mdi-music-note', path: '/rudiments/single-stroke-four'},
+              {title: 'Double stroke roll', icon: 'mdi-music-note', path: '/rudiments/double-stroke-roll'},
+              {title: 'Triple stroke roll', icon: 'mdi-music-note', path: '/rudiments/triple-stroke-roll'},
             ],
             mini: true,
-        })
+        }),
+        methods: {
+          checkIfNarrow() {
+            if (this.narrowNavigation) {
+              this.narrowNavigation = !this.narrowNavigation;
+            }
+          },
+          changeWidth() {
+            this.narrowNavigation = !this.narrowNavigation;
+            if (this.narrowNavigation) {
+              this.collapse = false;
+            }
+          }
+        }
     };
 </script>
 

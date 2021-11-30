@@ -6,7 +6,7 @@
 
 
 export default {
-  name: "Warmup",
+  name: "warmup",
 
   components: {
   },

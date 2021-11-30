@@ -6,7 +6,7 @@
 
 
 export default {
-  name: "Metronome",
+  name: "metronome",
 
   components: {
   },

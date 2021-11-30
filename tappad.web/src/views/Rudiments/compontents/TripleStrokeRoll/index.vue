@@ -1,12 +1,12 @@
 <template>
-  <h1>Home</h1>
+  <h1>Triple stroke roll</h1>
 </template>
 
 <script>
 
 
 export default {
-  name: 'home',
+  name: 'triple-stroke-roll',
   components: {
   },
 };
