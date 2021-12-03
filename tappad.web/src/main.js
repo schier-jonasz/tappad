@@ -6,6 +6,8 @@ import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
 
+Vue.use(vuetify);
+
 const vm = new Vue({
   router,
   store,

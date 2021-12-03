@@ -25,9 +25,9 @@
               link
               active-class="active-link"
             >
-              <v-list-icon>
+              <v-list-item-icon>
                 <v-icon>{{ page.icon }}</v-icon>
-              </v-list-icon>
+              </v-list-item-icon>
 
               <v-list-item-content>
                 <v-list-item-title class="ml-4">{{ page.title }}</v-list-item-title>
