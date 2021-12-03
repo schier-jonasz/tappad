@@ -46,9 +46,9 @@
                   :to="subpage.path"
                   link
                   active-class="active-link">
-                  <v-list-icon>
+                  <v-list-item-icon>
                     <v-icon>{{ subpage.icon }}</v-icon>
-                  </v-list-icon>
+                  </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title class="ml-4">{{ subpage.title }}</v-list-item-title>
                   </v-list-item-content>
