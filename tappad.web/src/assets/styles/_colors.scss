@@ -1,2 +1,11 @@
 $red: #dd656e;
 $navy-blue: #23374c;
+$alice-blue: #E7ECEF;
+$blue: #0090C1;
+
+:export {
+    red: $red;
+    navy-blue: $navy-blue;
+    alice-blue: $alice-blue;
+    blue: $blue;
+};

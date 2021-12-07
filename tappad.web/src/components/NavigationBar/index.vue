@@ -4,7 +4,7 @@
         :mini-variant="this.narrowNavigation"
         mini-variant-width="64"
         permanent
-        dark
+        light
         class="navbar"
       >
         <v-list-item 
@@ -30,7 +30,7 @@
               </v-list-item-icon>
 
               <v-list-item-content>
-                <v-list-item-title class="ml-4">{{ page.title }}</v-list-item-title>
+                <v-list-item-title class="ml-1">{{ page.title }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
             
@@ -50,7 +50,7 @@
                     <v-icon>{{ subpage.icon }}</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title class="ml-4">{{ subpage.title }}</v-list-item-title>
+                    <v-list-item-title class="ml-1">{{ subpage.title }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
             </v-list-group>
@@ -68,59 +68,64 @@
 </template>
 
 <script>
-    export default {
-        name: 'Navbar',
-        data: () => ({
-            navigation: true,
-            narrowNavigation: true,
-            collapse: false,
-            pages: [
-                {title: 'Home', icon: 'mdi-home-city', path: '/'},
-                {title: 'Metronome', icon: 'mdi-metronome', path: '/metronome'},
-                {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'}
-            ],
-            rudiments: [
-              {title: 'Single stroke roll', icon: 'mdi-music-note', path: '/rudiments/single-stroke-roll'},
-              {title: 'Single stroke four', icon: 'mdi-music-note', path: '/rudiments/single-stroke-four'},
-              {title: 'Double stroke roll', icon: 'mdi-music-note', path: '/rudiments/double-stroke-roll'},
-              {title: 'Triple stroke roll', icon: 'mdi-music-note', path: '/rudiments/triple-stroke-roll'},
-            ],
-            mini: true,
-        }),
-        methods: {
-          checkIfNarrow() {
-            if (this.narrowNavigation) {
-              this.narrowNavigation = !this.narrowNavigation;
-            }
-          },
-          changeWidth() {
+  import colors from '@/assets/styles/_colors.scss';  
+
+  export default {
+      name: 'Navbar',
+      data: () => ({
+          navigation: true,
+          narrowNavigation: true,
+          collapse: false,
+          colors,
+          pages: [
+              {title: 'Home', icon: 'mdi-home-city', path: '/'},
+              {title: 'Metronome', icon: 'mdi-metronome', path: '/metronome'},
+              {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'}
+          ],
+          rudiments: [
+            {title: 'Single stroke roll', icon: 'mdi-music-note', path: '/rudiments/single-stroke-roll'},
+            {title: 'Single stroke four', icon: 'mdi-music-note', path: '/rudiments/single-stroke-four'},
+            {title: 'Double stroke roll', icon: 'mdi-music-note', path: '/rudiments/double-stroke-roll'},
+            {title: 'Triple stroke roll', icon: 'mdi-music-note', path: '/rudiments/triple-stroke-roll'},
+          ],
+          mini: true,
+      }),
+      methods: {
+        checkIfNarrow() {
+          if (this.narrowNavigation) {
             this.narrowNavigation = !this.narrowNavigation;
-            if (this.narrowNavigation) {
-              this.collapse = false;
-            }
+          }
+        },
+        changeWidth() {
+          this.narrowNavigation = !this.narrowNavigation;
+          if (this.narrowNavigation) {
+            this.collapse = false;
           }
         }
-    };
+      }
+  };
 </script>
 
 <style lang="scss" scoped>
+  @import "@/assets/styles/_colors.scss";
+
   .navbar {
-    background-color: #23374c !important;
+    background-color: $alice-blue !important;
   }
 
   .title {
     font-size: 1.25em;
 
     &--span {
-      color: #dd656e;
+      color: $red;
     }
   }
 
   .active-link {
-    color: #dd656e !important;
+    color: $blue !important;
   }
 
   .button {
-    background-color: #7785AC !important;
+    background-color: $blue !important;
   }
 </style>
