@@ -18,18 +18,27 @@
             isPlaying: false,
             colors,
             loop: null,
+            bpm: 1000,
+            expected: Date.now() + this.bpm,
         }),
         methods: {
             async playStop() {
                 this.isPlaying = !this.isPlaying;
                 if (this.isPlaying) {
-                    var start = Date.now();
-                    this.loop = await setInterval(() => {
-                    console.log(Date.now() - start);
-                    }, 60000 / 60);
+                    this.loop = await setTimeout(this.step, this.interval);
                 } else {
-                    clearInterval(this.loop);
+                    clearTimeout(this.loop);
                 }
+            },
+            step() {
+                var date = Date.now() - this.expected;
+                if (date > this.bpm) {
+                    console.log('date > interval');
+                }
+                console.log(this.expected);
+
+                this.expected += this.bpm;
+                setTimeout(this.step, Math.max(0, this.bmp - date));
             }
         }
     }
