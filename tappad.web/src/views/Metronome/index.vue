@@ -14,19 +14,25 @@
         <v-icon>mdi-cog-outline</v-icon>
     </v-btn>
 
+    <!-- Settings drawer -->
     <v-navigation-drawer
-      v-model="drawer"
-      absolute
+      v-model="settings"
       temporary
+      right
+      absolute
+      hide-overlay
+      class="settings-drawer"
     >
-      <v-list-item>
-        <v-list-item-avatar>
-          <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
-        </v-list-item-avatar>
-
+      <v-list-item class="settings-header">
         <v-list-item-content>
-          <v-list-item-title>John Leider</v-list-item-title>
+          <v-list-item-title class="settings-header__title">Settings</v-list-item-title>
         </v-list-item-content>
+        <v-btn 
+          icon
+          large
+          @click="closeSettings()">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -35,6 +41,7 @@
         
       </v-list>
     </v-navigation-drawer>
+    <!-- End settings drawer -->
 
     <v-container class="mt-10">
       <v-col  
@@ -46,17 +53,19 @@
               <v-text-field
                 solo
                 flat
+                type="number"
                 class="metrum__input">             
               </v-text-field>
             </v-col>
             <p class="metrum__description">beat</p>
           </v-row>
-          <v-divider class="metrun__divider"></v-divider>
+          <v-divider class="metrum__divider"></v-divider>
           <v-row class="metrum__row">
             <v-col class="metrum__col">
               <v-text-field
                 solo
                 flat
+                type="number"
                 class="metrum__input">
               </v-text-field>
             </v-col>
@@ -71,17 +80,22 @@
         <v-card 
           elevation="3"
           class="beat rounded-circle">
-          <v-text-field 
+          <v-text-field
+            v-model="bpm"
             type="number" 
             class="beat__input"
-            value="120"></v-text-field>
-          <p class="beat__bpm">BMP</p>
+            ></v-text-field>
+          <p class="beat__bpm">BPM</p>
         </v-card>
       </v-col>
       <v-col 
         align="center"
         justify="center">
-        <v-btn outlined icon large>
+        <v-btn 
+          outlined 
+          icon 
+          large
+          @click="playStopMetronome()">
           <v-icon v-if="!isPlaying">mdi-play</v-icon>
           <v-icon v-else>mdi-pause</v-icon>
         </v-btn>  
@@ -91,13 +105,9 @@
 </template>
 
 <script>
-  import sound from 'vue-use-sound';
-  import bubbleTap from '@/assets/sounds/bubble-tap.mp3';
-  import metronomePulse from '@/assets/sounds/metronome-pulse.flac';
-  import woodTap from '@/assets/sounds/wood-tap.mp3';
-
   import colors from '@/assets/styles/_colors.scss';  
-  import clickTime from '@/assets/js/timeClick';
+  import audio from '@/assets/sounds/click1.mp3';
+  import * as Tone from "tone";
 
 
 
@@ -105,37 +115,73 @@
     name: "metronome",
     data: () => ({
         isPlaying: false,
-        drawer: null,
+        settings: false,
         colors,
         loop: null,
-        bmp: 120,
-        metronome: new clickTime(playBubble, 60000 / 60, { immediate: true }),
-        items: [
-          { title: 'Home', icon: 'mdi-view-dashboard' },
-          { title: 'About', icon: 'mdi-forum' },
-        ],
+        bpm: 120,
+        metronome: null,
+        timer: null,
+        synth: new Tone.Synth().toDestination(),
+        now: null,
+        osc: new Tone.Oscillator().toDestination(),
+        transport: Tone.Transport,
+        audio: new Audio(audio),
+        part: null,
     }),
-    setup() {
-      const playBubble = sound(bubbleTap);
-      const playPulse = sound(metronomePulse);
-      const playWood = sound(woodTap);
-      return {
-        playBubble,
-        playPulse,
-        playWood
-      }
-    },
     components: {
     },
     methods: {
       playStopMetronome() {
+        this.isPlaying = !this.isPlaying;
 
+        this.transport.bpm.value = this.bpm;
+        /*
+        this.transport.scheduleRepeat((time) => {
+          console.log(time);
+          this.osc.start(time).stop(time + 0.03);
+        }, "4n");
+        */
+        // console.log(this.transport.state, this.isPlaying);
+
+        this.part = new Tone.Part((time, note) => {
+          console.log(time, note);
+        }, []);
+        this.part.loop = true;
+        this.part.start(0);
+        this.isPlaying ? this.start() : this.stop();
+        // watch - https://indiebubbler.github.io/metro/
+      },
+      start() {
+        console.log('wloz');
+        this.transport.start("+.1");
+        this.part.start();
+      },
+      stop() {
+        this.transport.stop();
+        this.transport.position = 0;
       },
       openSettings() {
-        this.drawer = !this.drawer;
-        console.log(this.drawer);
+        this.settings = !this.settings;
+      },
+      closeSettings() {
+        this.settings = false;
+      },
+      playClick() {
+        console.log('click');
+        this.audio.play();
+      },
+    },
+    watch: {
+      updateNow() {
+         this.now = Tone.now();
+         console.log(this.now);
       }
     }
+    // created() {
+    //     console.log("Yea, created broh");
+    //     new this.Tone();
+    //     console.log('nope');
+    // }
   };
 </script>
 
@@ -145,7 +191,7 @@
 
     &__settings {
       position: absolute;
-      top: 106px;
+      top: 72px;
       right: 24px;
     }
   }
@@ -198,7 +244,7 @@
       }
 
       &__col {
-        max-width: 48px !important;
+        max-width: 80px !important;
         padding: 0 !important;
         margin: 0 !important;
       }
@@ -210,11 +256,13 @@
       &__input * {
         margin: 0;
         text-align: center;
+        width: 64px;
       }
 
       &__input input {
         /* background-color: cyan; */
         box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        padding: 8px 8px !important;
       }
 
       &__description {
@@ -222,10 +270,17 @@
         font-weight: bold;
         color: grey;
       }
+
+      &__divider {
+        width: 100px;
+        margin-left: 32px; 
+      }
   }
 
-  .v-divider {
-    width: 90px;
-    margin-left: 22px;  
+  .settings-header {
+    &__title {
+      font-weight: bold;
+      font-size: 1.25em;
+    }
   }
 </style>
