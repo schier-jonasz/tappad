@@ -51,6 +51,7 @@
           <v-row class="metrum__row">
             <v-col class="metrum__col">
               <v-text-field
+                v-model="beat"
                 solo
                 flat
                 type="number"
@@ -63,6 +64,7 @@
           <v-row class="metrum__row">
             <v-col class="metrum__col">
               <v-text-field
+                v-model="note"
                 solo
                 flat
                 type="number"
@@ -107,6 +109,7 @@
 <script>
   import colors from '@/assets/styles/_colors.scss';  
   import audio from '@/assets/sounds/click1.mp3';
+  import tapDown from '@/assets/sounds/down.wav';
   import * as Tone from "tone";
 
 
@@ -117,48 +120,72 @@
         isPlaying: false,
         settings: false,
         colors,
-        loop: null,
         bpm: 120,
+        beat: 4,
+        note: 4,
         metronome: null,
-        timer: null,
-        synth: new Tone.Synth().toDestination(),
-        now: null,
-        osc: new Tone.Oscillator().toDestination(),
+        tone: Tone,
         transport: Tone.Transport,
+        toneLoop: null,
         audio: new Audio(audio),
         part: null,
+        counter: 0,
     }),
     components: {
     },
     methods: {
       playStopMetronome() {
+        let note = this.note + 'n';
+        
         this.isPlaying = !this.isPlaying;
-
         this.transport.bpm.value = this.bpm;
-        /*
-        this.transport.scheduleRepeat((time) => {
-          console.log(time);
-          this.osc.start(time).stop(time + 0.03);
-        }, "4n");
-        */
-        // console.log(this.transport.state, this.isPlaying);
+        this.transport.timeSignature = this.beat + '/' + this.note;
 
-        this.part = new Tone.Part((time, note) => {
-          console.log(time, note);
-        }, []);
-        this.part.loop = true;
-        this.part.start(0);
+        //initiate tone player to play mp3/wav
+        // var bufferTap = new Tone.Buffer(tapDown);
+        // var bufferAccent = new Tone.Buffer(audio);
+        // var player = new Tone.Players({
+        //   'regularTap': bufferTap,
+        //   'accent': bufferAccent,
+        // });
+        const regularTap = new Tone.Player(tapDown).toDestination();
+        const accent = new Tone.Player(audio).toDestination();
+        
+        
+        //base interval to play metronome
+        // if (this.toneLoop == null) {
+        this.toneLoop = this.createToneLoop(regularTap, accent, note)
+        // }
+        console.log(this.tone, this.transport);
+        console.log(this.counter);
+
         this.isPlaying ? this.start() : this.stop();
         // watch - https://indiebubbler.github.io/metro/
       },
       start() {
-        console.log('wloz');
-        this.transport.start("+.1");
-        this.part.start();
+        console.log('start()');
+        this.transport.start();
+        this.toneLoop.start(0);
       },
       stop() {
+        console.log('stop()');
         this.transport.stop();
-        this.transport.position = 0;
+        this.toneLoop.stop(0);
+        this.counter = 0;
+      },
+      createToneLoop(regularTap, accent, note) {
+        const loop = new Tone.Loop((time) => {
+          if (this.counter % this.beat === 0) {
+            accent.start(time);
+            console.log(time, 'accent');
+          } else {
+            regularTap.start(time);
+            console.log(time, 'tap');
+          }
+          this.counter++;
+          console.log('counter:', this.counter);
+        }, note);
+        return loop;
       },
       openSettings() {
         this.settings = !this.settings;
@@ -166,22 +193,14 @@
       closeSettings() {
         this.settings = false;
       },
-      playClick() {
-        console.log('click');
-        this.audio.play();
-      },
     },
     watch: {
-      updateNow() {
-         this.now = Tone.now();
-         console.log(this.now);
+      setTempo(bpm) {
+        this.bpm = bpm;
+        this.transport.bpm.value = this.bpm;
+        console.log(this.bpm);
       }
     }
-    // created() {
-    //     console.log("Yea, created broh");
-    //     new this.Tone();
-    //     console.log('nope');
-    // }
   };
 </script>
 
@@ -261,7 +280,7 @@
 
       &__input input {
         /* background-color: cyan; */
-        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
         padding: 8px 8px !important;
       }
 
