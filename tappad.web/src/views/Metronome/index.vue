@@ -148,43 +148,42 @@
         //   'regularTap': bufferTap,
         //   'accent': bufferAccent,
         // });
-        const regularTap = new Tone.Player(tapDown).toDestination();
+
+        const regularTap = new Tone.Player({
+          url: tapDown,
+        }).toDestination();
         const accent = new Tone.Player(audio).toDestination();
         
         
         //base interval to play metronome
-        // if (this.toneLoop == null) {
-        this.toneLoop = this.createToneLoop(regularTap, accent, note)
-        // }
-        console.log(this.tone, this.transport);
-        console.log(this.counter);
-
+        if (this.toneLoop == null) {
+          this.toneLoop = this.createToneLoop(regularTap, accent)
+        }
+        this.toneLoop.set({interval: note});
+        
         this.isPlaying ? this.start() : this.stop();
         // watch - https://indiebubbler.github.io/metro/
       },
       start() {
-        console.log('start()');
-        this.transport.start();
-        this.toneLoop.start(0);
+        this.tone.loaded().then(() => {
+          this.transport.start();
+          this.toneLoop.start(0);
+        });
       },
       stop() {
-        console.log('stop()');
         this.transport.stop();
         this.toneLoop.stop(0);
         this.counter = 0;
       },
-      createToneLoop(regularTap, accent, note) {
-        const loop = new Tone.Loop((time) => {
+      createToneLoop(regularTap, accent) {
+        const loop = new Tone.Loop((time) => {          
           if (this.counter % this.beat === 0) {
             accent.start(time);
-            console.log(time, 'accent');
           } else {
             regularTap.start(time);
-            console.log(time, 'tap');
           }
           this.counter++;
-          console.log('counter:', this.counter);
-        }, note);
+        });
         return loop;
       },
       openSettings() {
@@ -200,6 +199,9 @@
         this.transport.bpm.value = this.bpm;
         console.log(this.bpm);
       }
+    },
+    async created() {
+      await Tone.start();
     }
   };
 </script>
@@ -269,13 +271,13 @@
       }
 
       &__input {
-        width: 48px;
+        width: 56px;        
       }
 
       &__input * {
         margin: 0;
         text-align: center;
-        width: 64px;
+        width: 72px;
       }
 
       &__input input {
@@ -288,10 +290,11 @@
         text-transform: uppercase;
         font-weight: bold;
         color: grey;
+        margin-left: 8px;
       }
 
       &__divider {
-        width: 100px;
+        width: 110px;
         margin-left: 32px; 
       }
   }
