@@ -37,9 +37,63 @@
 
       <v-divider></v-divider>
 
-      <v-list dense>
-        
-      </v-list>
+      <v-list-item dense>
+        <v-container fluid>
+          <v-list-item-subtitle>
+          Sounds
+        </v-list-item-subtitle>
+          <v-row align="center">
+            <v-col class="pt-4 pb-0">
+              Regular tap
+            </v-col>
+            <v-col class="py-0">
+              <v-select
+                v-model="regularTapPath"
+                :items="sounds"
+                @change="checkAccent"
+                :disabled="isPlaying"
+                item-text="name"
+                item-value="path"
+                label="Tap"
+                single-line
+                dense
+                outlined
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col class="py-0">
+              Accent
+            </v-col>
+            <v-col class="py-0">
+              <v-select
+                v-model="accentPath"
+                :items="sounds"
+                :disabled="!ifAccent || isPlaying"
+                item-text="name"
+                item-value="path"
+                :item-disabled="disableItem"
+                label="Accent"
+                single-line
+                dense
+                outlined
+              ></v-select>
+            </v-col>
+          </v-row> 
+          <v-divider class="my-3"></v-divider>
+          <v-list-item-subtitle>
+            Accent
+          </v-list-item-subtitle>
+          <v-row aling="center">
+            <v-col class="py-0">
+              <v-switch
+                v-model="ifAccent"
+                inset
+            ></v-switch>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-list-item>
     </v-navigation-drawer>
     <!-- End settings drawer -->
 
@@ -83,13 +137,23 @@
           elevation="3"
           class="beat rounded-circle">
           <v-text-field
-            v-model="bpm"
-            type="number" 
+            v-model="setBpm"
+            @input="validateBpm"
+            type="number"
             class="beat__input"
             ></v-text-field>
           <p class="beat__bpm">BPM</p>
         </v-card>
       </v-col>
+      <v-slider
+        v-model="setPlayerVolume"
+        prepend-icon="mdi-volume-high"
+        max="100"
+        min="0"
+        :thumb-size="24"
+        thumb-label
+        class="volume-slider"
+      ></v-slider>
       <v-col 
         align="center"
         justify="center">
@@ -108,8 +172,9 @@
 
 <script>
   import colors from '@/assets/styles/_colors.scss';  
-  import audio from '@/assets/sounds/click1.mp3';
-  import tapDown from '@/assets/sounds/down.wav';
+
+  import { sounds } from '@/assets/js/exportSounds';
+
   import * as Tone from "tone";
 
 
@@ -120,51 +185,43 @@
         isPlaying: false,
         settings: false,
         colors,
-        bpm: 120,
+        setBpm: 120,
         beat: 4,
         note: 4,
-        metronome: null,
         tone: Tone,
         transport: Tone.Transport,
         toneLoop: null,
-        audio: new Audio(audio),
         part: null,
         counter: 0,
+        playerVolume: 100,
+        regularTap: null,
+        accent: null,
+        regularTapPath: sounds[0].path,
+        accentPath: sounds[1].path,
+        sounds,
+        setPlayerVolume: 100,
+        ifAccent: true,
     }),
     components: {
     },
     methods: {
       playStopMetronome() {
-        let note = this.note + 'n';
-        
         this.isPlaying = !this.isPlaying;
-        this.transport.bpm.value = this.bpm;
-        this.transport.timeSignature = this.beat + '/' + this.note;
-
-        //initiate tone player to play mp3/wav
-        // var bufferTap = new Tone.Buffer(tapDown);
-        // var bufferAccent = new Tone.Buffer(audio);
-        // var player = new Tone.Players({
-        //   'regularTap': bufferTap,
-        //   'accent': bufferAccent,
-        // });
-
-        const regularTap = new Tone.Player({
-          url: tapDown,
-        }).toDestination();
-        const accent = new Tone.Player(audio).toDestination();
-        
-        
-        //base interval to play metronome
-        if (this.toneLoop == null) {
-          this.toneLoop = this.createToneLoop(regularTap, accent)
-        }
-        this.toneLoop.set({interval: note});
         
         this.isPlaying ? this.start() : this.stop();
         // watch - https://indiebubbler.github.io/metro/
       },
       start() {
+        let note = this.note + 'n';
+        this.transport.bpm.value = this.setBpm;
+        this.transport.timeSignature = this.beat + '/' + this.note;
+
+        //initiate tone player to play mp3/wav
+        this.createAudioPlayers(this.regularTapPath, this.accentPath);
+
+        this.toneLoop = this.createToneLoop();
+        this.toneLoop.set({interval: note});
+
         this.tone.loaded().then(() => {
           this.transport.start();
           this.toneLoop.start(0);
@@ -172,19 +229,35 @@
       },
       stop() {
         this.transport.stop();
+
         this.toneLoop.stop(0);
+        this.toneLoop.dispose();
+
+        this.regularTap.stop();
+        this.accent.stop();
+
+        this.regularTap.dispose();
+        this.accent.dispose();
+
         this.counter = 0;
       },
-      createToneLoop(regularTap, accent) {
-        const loop = new Tone.Loop((time) => {          
-          if (this.counter % this.beat === 0) {
-            accent.start(time);
+      createToneLoop() {
+        const loop = new Tone.Loop((time) => { 
+          if (this.ifAccent && this.counter % this.beat === 0) {
+            this.accent.start(time);
           } else {
-            regularTap.start(time);
+            this.regularTap.start(time);
           }
-          this.counter++;
+          this.counter++;     
         });
         return loop;
+      },
+      createAudioPlayers(regularTapPath, accentPath) {
+        this.accent = new Tone.Player(accentPath).toDestination();
+        this.regularTap = new Tone.Player(regularTapPath).toDestination();
+
+        this.regularTap.volume.input.value = this.setPlayerVolume / 100;
+        this.accent.volume.input.value = this.setPlayerVolume / 100;
       },
       openSettings() {
         this.settings = !this.settings;
@@ -192,13 +265,26 @@
       closeSettings() {
         this.settings = false;
       },
+      validateBpm(value) {
+        console.log(value.length);
+      },
+      disableItem(item) {
+        return item.path === this.regularTap;
+      },
+      checkAccent(item) {
+        if (item === this.accent) {
+          // this.accent = null;
+        }
+      }
     },
     watch: {
-      setTempo(bpm) {
-        this.bpm = bpm;
-        this.transport.bpm.value = this.bpm;
-        console.log(this.bpm);
-      }
+      setBpm(bpm) {
+        this.transport.bpm.value = bpm;
+      },
+      setPlayerVolume(volume) {
+        this.regularTap.volume.input.value = volume / 100;
+        this.accent.volume.input.value = volume / 100;
+      },
     },
     async created() {
       await Tone.start();
@@ -304,5 +390,19 @@
       font-weight: bold;
       font-size: 1.25em;
     }
+  }
+
+  .volume-slider {
+    width: 50%;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  .volume-slider .v-input__slot {
+    margin: 0;
+  }
+
+  .volume-slider .v-input__control .v-messages {
+    display: none;
   }
 </style>
