@@ -50,10 +50,10 @@
               <v-select
                 v-model="regularTapPath"
                 :items="sounds"
-                @change="checkAccent"
                 :disabled="isPlaying"
                 item-text="name"
                 item-value="path"
+                :item-disabled="disabledRegularTap"
                 label="Tap"
                 single-line
                 dense
@@ -69,10 +69,10 @@
               <v-select
                 v-model="accentPath"
                 :items="sounds"
-                :disabled="!ifAccent || isPlaying"
+                :disabled="!isAccentEnabled || isPlaying"
                 item-text="name"
                 item-value="path"
-                :item-disabled="disableItem"
+                :item-disabled="disableAccent"
                 label="Accent"
                 single-line
                 dense
@@ -87,9 +87,22 @@
           <v-row aling="center">
             <v-col class="py-0">
               <v-switch
-                v-model="ifAccent"
+                v-model="isAccentEnabled"
                 inset
             ></v-switch>
+            </v-col>
+          </v-row>
+          <v-divider class="my-3"></v-divider>
+          <v-list-item-subtitle>
+            BPM
+          </v-list-item-subtitle>
+          <v-row aling="center">
+            <v-col class="pt-5">
+              <v-btn
+                :color="colors.blue"
+                outlined>
+                tap
+              </v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -97,10 +110,12 @@
     </v-navigation-drawer>
     <!-- End settings drawer -->
 
+    <!--METRONOME SECTION -->
     <v-container class="mt-10">
       <v-col  
         align="center"
         justify="center">
+        <!-- Metrum -->
         <v-container class="metrum">
           <v-row class="metrum__row">
             <v-col class="metrum__col">
@@ -128,7 +143,9 @@
             <p class="metrum__description">note</p>
           </v-row>
         </v-container>
+        <!-- End Metrum -->
       </v-col>
+      <!-- Metronome circle -->
       <v-col 
         class="" 
         align="center"
@@ -145,6 +162,8 @@
           <p class="beat__bpm">BPM</p>
         </v-card>
       </v-col>
+      <!-- End Metronome circle -->
+      <!-- Volume -->
       <v-slider
         v-model="setPlayerVolume"
         prepend-icon="mdi-volume-high"
@@ -154,6 +173,8 @@
         thumb-label
         class="volume-slider"
       ></v-slider>
+      <!-- End volume -->
+      <!-- Start/stop button -->
       <v-col 
         align="center"
         justify="center">
@@ -166,15 +187,14 @@
           <v-icon v-else>mdi-pause</v-icon>
         </v-btn>  
       </v-col>
+      <!-- End start/stop button -->
     </v-container>
   </main>
 </template>
 
 <script>
   import colors from '@/assets/styles/_colors.scss';  
-
   import { sounds } from '@/assets/js/exportSounds';
-
   import * as Tone from "tone";
 
 
@@ -191,7 +211,6 @@
         tone: Tone,
         transport: Tone.Transport,
         toneLoop: null,
-        part: null,
         counter: 0,
         playerVolume: 100,
         regularTap: null,
@@ -200,7 +219,7 @@
         accentPath: sounds[1].path,
         sounds,
         setPlayerVolume: 100,
-        ifAccent: true,
+        isAccentEnabled: true,
     }),
     components: {
     },
@@ -243,7 +262,7 @@
       },
       createToneLoop() {
         const loop = new Tone.Loop((time) => { 
-          if (this.ifAccent && this.counter % this.beat === 0) {
+          if (this.isAccentEnabled && this.counter % this.beat === 0) {
             this.accent.start(time);
           } else {
             this.regularTap.start(time);
@@ -266,16 +285,14 @@
         this.settings = false;
       },
       validateBpm(value) {
-        console.log(value.length);
+        console.log(value.length); //TODO - validation bpm
       },
-      disableItem(item) {
-        return item.path === this.regularTap;
+      disableAccent(item) {
+        return item.path === this.regularTapPath;
       },
-      checkAccent(item) {
-        if (item === this.accent) {
-          // this.accent = null;
-        }
-      }
+      disabledRegularTap(item) {
+        return item.path === this.accentPath;
+      },
     },
     watch: {
       setBpm(bpm) {
