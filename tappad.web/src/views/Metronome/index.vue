@@ -259,6 +259,7 @@
         this.accent.dispose();
 
         this.counter = 0;
+        this.rythm.stop();
       },
       createToneLoop() {
         const loop = new Tone.Loop((time) => { 
@@ -268,6 +269,7 @@
             this.regularTap.start(time);
           }
           this.counter++;     
+          console.log(60 / this.transport.bpm.value);
         });
         return loop;
       },
