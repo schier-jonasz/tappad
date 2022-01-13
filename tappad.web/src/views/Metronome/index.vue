@@ -10,6 +10,7 @@
       outlined
       icon
       large
+      :color="colors.red"
       @click="openSettings()">
         <v-icon>mdi-cog-outline</v-icon>
     </v-btn>
@@ -147,7 +148,6 @@
       </v-col>
       <!-- Metronome circle -->
       <v-col 
-        class="" 
         align="center"
         justify="center">
         <v-card 
@@ -182,6 +182,7 @@
           outlined 
           icon 
           large
+          :color="colors.red"
           @click="playStopMetronome()">
           <v-icon v-if="!isPlaying">mdi-play</v-icon>
           <v-icon v-else>mdi-pause</v-icon>
@@ -259,7 +260,6 @@
         this.accent.dispose();
 
         this.counter = 0;
-        this.rythm.stop();
       },
       createToneLoop() {
         const loop = new Tone.Loop((time) => { 
@@ -269,7 +269,6 @@
             this.regularTap.start(time);
           }
           this.counter++;     
-          console.log(60 / this.transport.bpm.value);
         });
         return loop;
       },
