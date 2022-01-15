@@ -62,7 +62,8 @@
           outlined 
           icon 
           large
-          :color="colors.red">
+          :color="colors.red"
+          @click="playStopRudiment()">
           <v-icon v-if="!isPlaying">mdi-play</v-icon>
           <v-icon v-else>mdi-pause</v-icon>
         </v-btn>  
@@ -86,22 +87,61 @@ export default {
     rudiments,
     colors,
     rudiment: rudiments[0],
-    part: null,
     isPlaying: false,
+    tonePart: null,
+    Tone,
+    transport: Tone.Transport,
   }),
   components: {
   },
   methods: {
+    playStopRudiment() {
+        this.isPlaying = !this.isPlaying;
+        
+        this.isPlaying ? this.start() : this.stop();
+    },
+    start() {
+      this.tonePart = this.createTonePart();
+      this.tonePart.loop = true;
+
+      this.transport.bpm.value = 60;
+      this.transport.timeSignature = [4, 8];
+      
+      this.Tone.loaded().then(() => {
+          this.transport.start();
+          this.tonePart.start(0);
+      });
+    },
+    stop() {
+      this.transport.stop();
+
+      this.tonePart.stop();
+      this.tonePart.dispose();
+    },
+    createTonePart() {
+      const right = new Tone.Player(sounds[5].path).toDestination();
+      const left = new Tone.Player(sounds[1].path).toDestination();
+
+      const part = new Tone.Part(((time, note) => {
+        console.log(note, time);
+        if (note.hand == 'R') {
+          right.start(time)
+        } else {
+          left.start(time);
+        }
+      }), this.rudiment.track);
+      return part;
+    },
     sound() {
       // const synth = new Tone.Synth().toDestination();
-      console.log(this.rudiment);
+      // console.log(this.rudiment);
 
-      const singleStrokeRoll = [
-        { note: 'C3', dur: '16n', time: `0:0:0`, hand: 'R' },
-        { note: 'C4', dur: '16n', time: `0:0:1`, hand: 'L' },
-        { note: 'C3', dur: '16n', time: `0:0:2`, hand: 'R' },
-        { note: 'C3', dur: '16n', time: `0:0:3`, hand: 'L' },
-      ];
+      // const singleStrokeRoll = [
+      //   { dur: '16n', time: `0:0:0`, hand: 'R' },
+      //   { dur: '16n', time: `0:0:2`, hand: 'L' },
+      //   { dur: '16n', time: `0:0:4`, hand: 'R' },
+      //   { dur: '16n', time: `0:0:6`, hand: 'L' },
+      // ];
 
       // const singleStrokeFour = [
       //   { note: 'G3', dur: '16n', time: `0:0:1` },
@@ -120,28 +160,13 @@ export default {
       //   { note: 'G3', dur: '16n', time: `0:0:7` },
       // ];
 
-      const right = new Tone.Player(sounds[0].path).toDestination();
-      const left = new Tone.Player(sounds[1].path).toDestination();
-
-      this.part = new Tone.Part(((time, note) => {
-        if (note.hand == 'R') {
-          right.start(time)
-        } else {
-          left.start(time);
-        }
-      }), singleStrokeRoll);
+      
 
 
-      Tone.Transport.timeSignature = [3, 4];
-      Tone.Transport.bpm.value = 160;
-      Tone.Transport.start();
+      
       this.part.loop = true;
-      this.part.loopEnd = '1m';
       this.part.start(0);
     },
-    stop() {
-      this.part.stop();
-    }
   }
 };
 </script>
