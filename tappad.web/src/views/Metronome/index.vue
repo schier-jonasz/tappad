@@ -99,11 +99,17 @@
           </v-list-item-subtitle>
           <v-row aling="center">
             <v-col class="pt-5">
+              <Keypress :disabled="isPlaying" key-event="keyup" :key-code="32" @success="calculateTapBpm"/>
               <v-btn
                 :color="colors.blue"
-                outlined>
+                outlined
+                :disabled="isPlaying"
+                @click="calculateTapBpm()">
                 tap
               </v-btn>
+            </v-col>
+            <v-col class="tap-bpm pt-7 font-weight-bold" v-if="tapCounter > 2">
+              {{ tapBpm }}
             </v-col>
           </v-row>
         </v-container>
@@ -198,8 +204,6 @@
   import { sounds } from '@/assets/js/exportSounds';
   import * as Tone from "tone";
 
-
-
   export default {
     name: "metronome",
     data: () => ({
@@ -221,8 +225,11 @@
         sounds,
         setPlayerVolume: 100,
         isAccentEnabled: true,
+        tapBpm: 0,
+        tapCounter: 0,
     }),
     components: {
+      Keypress: () => import('vue-keypress'),
     },
     methods: {
       playStopMetronome() {
@@ -284,6 +291,7 @@
       },
       closeSettings() {
         this.settings = false;
+        this.tapCounter = 0;
       },
       validateBpm(value) {
         console.log(value.length); //TODO - validation bpm
@@ -294,6 +302,14 @@
       disabledRegularTap(item) {
         return item.path === this.accentPath;
       },
+      calculateTapBpm() {
+        this.tapCounter += 1;
+        let elapsedTime = Tone.Transport.seconds;
+        Tone.Transport.stop().start();
+        let bpm = (60 / elapsedTime).toFixed(0);
+        this.tapBpm = bpm;
+        console.log('BPM: ', bpm);
+      }
     },
     watch: {
       setBpm(bpm) {
@@ -311,6 +327,8 @@
 </script>
 
 <style lang="scss">
+  @import "@/assets/styles/_colors.scss";
+
   .content {
     position: relative;
 
@@ -422,5 +440,9 @@
 
   .volume-slider .v-input__control .v-messages {
     display: none;
+  }
+
+  .tap-bpm {
+    color: $navy-blue;
   }
 </style>

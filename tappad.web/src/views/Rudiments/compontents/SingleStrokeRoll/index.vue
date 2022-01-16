@@ -4,6 +4,7 @@
       <v-select
         v-model="rudiment"
         :items="rudiments"
+        :disabled="isPlaying"
         item-text="title"
         label="Choose rudiment"
         style="width: 50%;"
@@ -101,11 +102,11 @@ export default {
         this.isPlaying ? this.start() : this.stop();
     },
     start() {
+      this.transport.bpm.value = 60;
+      this.transport.timeSignature = this.rudiment.timeSignature;
+
       this.tonePart = this.createTonePart();
       this.tonePart.loop = true;
-
-      this.transport.bpm.value = 60;
-      this.transport.timeSignature = [4, 8];
       
       this.Tone.loaded().then(() => {
           this.transport.start();
@@ -123,7 +124,7 @@ export default {
       const left = new Tone.Player(sounds[1].path).toDestination();
 
       const part = new Tone.Part(((time, note) => {
-        console.log(note, time);
+        console.log(Tone.Transport.position, note.time);
         if (note.hand == 'R') {
           right.start(time)
         } else {
@@ -143,29 +144,65 @@ export default {
       //   { dur: '16n', time: `0:0:6`, hand: 'L' },
       // ];
 
+      // const tripleStrokeRoll = [
+      //   { dur: '8n', time: `0:0:0`, hand: 'R' },
+      //   { dur: '8n', time: `0:0:1`, hand: 'R' },
+      //   { dur: '8n', time: `0:0:2`, hand: 'R' },
+      //   { dur: '8n', time: `0:0:3`, hand: 'L' },
+      //   { dur: '8n', time: `0:0:4`, hand: 'L' },
+      //   { dur: '8n', time: `0:0:5`, hand: 'L' }
+      // ];
+
       // const singleStrokeFour = [
-      //   { note: 'G3', dur: '16n', time: `0:0:1` },
-      //   { note: 'G4', dur: '16n', time: `0:0:2` },
-      //   { note: 'G5', dur: '16n', time: `0:0:3` },
-      //   { note: 'G6', dur: '16n', time: `0:0:4` },
+      //   { dur: '16n', time: `0:0:0`, hand: 'L' },
+      //   { dur: '16n', time: `0:0:1`, hand: 'L' },
+      //   { dur: '16n', time: `0:0:2`, hand: 'L' },
+      //   { dur: '16n', time: `0:0:3`, hand: 'L' },
+      //   { dur: '16n', time: `0:0:4`, hand: 'R' },
+      //   { dur: '16n', time: `0:0:5`, hand: 'R' },
+      //   { dur: '16n', time: `0:0:6`, hand: 'R' },
+      //   { dur: '16n', time: `0:0:7`, hand: 'R' },
       // ];
 
-      // const singleStrokeSeven = [
-      //   { note: 'G3', dur: '16n', time: `0:0:1` },
-      //   { note: 'G4', dur: '16n', time: `0:0:2` },
-      //   { note: 'G3', dur: '16n', time: `0:0:3` },
-      //   { note: 'G4', dur: '16n', time: `0:0:4` },
-      //   { note: 'G3', dur: '16n', time: `0:0:5` },
-      //   { note: 'G4', dur: '16n', time: `0:0:6` },
-      //   { note: 'G3', dur: '16n', time: `0:0:7` },
-      // ];
+      const singleStrokeSeven = [
+            { duration: '16n', time: `0:0:0`, hand: 'R' },
+            { duration: '16n', time: `0:0:1`, hand: 'R' },
+            { duration: '16n', time: `0:0:2`, hand: 'R' },
+            { duration: '16n', time: `0:0:3`, hand: 'R' },
+            { duration: '16n', time: `0:0:4`, hand: 'R' },
+            { duration: '16n', time: `0:0:5`, hand: 'R' },
+            { duration: '16n', time: `0:0:6`, hand: 'R' },
+            { duration: '16n', time: `0:0:7`, hand: 'L' },
+            { duration: '16n', time: `0:0:8`, hand: 'L' },
+            { duration: '16n', time: `0:0:9`, hand: 'L' },
+            { duration: '16n', time: `0:0:10`, hand: 'L' },
+            { duration: '16n', time: `0:0:11`, hand: 'L' },
+            { duration: '16n', time: `0:0:12`, hand: 'L' },
+            { duration: '16n', time: `0:0:13`, hand: 'L' },
+        ];
 
       
+      const right = new Tone.Player(sounds[5].path).toDestination();
+      const left = new Tone.Player(sounds[1].path).toDestination();
 
+      Tone.Transport.bpm.value = 120;
+      Tone.Transport.timeSignature = [7, 8];
+
+      const part = new Tone.Part(((time, note) => {
+        console.log(Tone.Transport.position, note.time);
+        
+        if (note.hand == 'R') {
+          right.start(time)
+        } else {
+          left.start(time);
+        }
+      }), singleStrokeSeven);
 
       
-      this.part.loop = true;
-      this.part.start(0);
+      // Tone.Transport.loopEnd = "1m";
+      part.loop = true;
+      Tone.Transport.start();
+      part.start(0);
     },
   }
 };

@@ -4,23 +4,24 @@ const rudiments = [
         title: 'Single Stroke Roll',
         description: 'This drum rudiment consists of alternating strokes played between the hands – R (right) L (left) R L R L…or L R L R L R…in case you’re left hand dominant. No matter the hand you start playing it with, it’s important you learn how to execute the single stroke roll leading with both hands.',
         track: [
-            { duration: '32n', time: `0:0:0`, hand: 'R' },
-            { duration: '32n', time: `0:0:2`, hand: 'L' },
-            { duration: '32n', time: `0:0:4`, hand: 'R' },
-            { duration: '32n', time: `0:0:6`, hand: 'L' },
-            { duration: '32n', time: `0:0:8`, hand: 'R' },
-            { duration: '32n', time: `0:0:10`, hand: 'L' },
-            { duration: '32n', time: `0:0:12`, hand: 'R' },
-            { duration: '32n', time: `0:0:14`, hand: 'L' },
-            { duration: '32n', time: `0:0:16`, hand: 'R' },
-            { duration: '32n', time: `0:0:18`, hand: 'L' },
-            { duration: '32n', time: `0:0:20`, hand: 'R' },
-            { duration: '32n', time: `0:0:22`, hand: 'L' },
-            { duration: '32n', time: `0:0:24`, hand: 'R' },
-            { duration: '32n', time: `0:0:26`, hand: 'L' },
-            { duration: '32n', time: `0:0:28`, hand: 'R' },
-            { duration: '32n', time: `0:0:30`, hand: 'L' },
-        ]
+            { duration: '16n', time: `0:0:0`, hand: 'R' },
+            { duration: '16n', time: `0:0:2`, hand: 'L' },
+            { duration: '16n', time: `0:0:4`, hand: 'R' },
+            { duration: '16n', time: `0:0:6`, hand: 'L' },
+            { duration: '16n', time: `0:0:8`, hand: 'R' },
+            { duration: '16n', time: `0:0:10`, hand: 'L' },
+            { duration: '16n', time: `0:0:12`, hand: 'R' },
+            { duration: '16n', time: `0:0:14`, hand: 'L' },
+            { duration: '16n', time: `0:0:16`, hand: 'R' },
+            { duration: '16n', time: `0:0:18`, hand: 'L' },
+            { duration: '16n', time: `0:0:20`, hand: 'R' },
+            { duration: '16n', time: `0:0:22`, hand: 'L' },
+            { duration: '16n', time: `0:0:24`, hand: 'R' },
+            { duration: '16n', time: `0:0:26`, hand: 'L' },
+            { duration: '16n', time: `0:0:28`, hand: 'R' },
+            { duration: '16n', time: `0:0:30`, hand: 'L' },
+        ],
+        timeSignature: [4, 2]
     },
     {
         title: 'Single Stroke Four',
@@ -30,11 +31,12 @@ const rudiments = [
             { duration: '16n', time: `0:0:1`, hand: 'L' },
             { duration: '16n', time: `0:0:2`, hand: 'R' },
             { duration: '16n', time: `0:0:3`, hand: 'L' },
-            { duration: '16n', time: `0:0:4`, hand: 'R' },
-            { duration: '16n', time: `0:0:5`, hand: 'L' },
-            { duration: '16n', time: `0:0:6`, hand: 'R' },
-            { duration: '16n', time: `0:0:7`, hand: 'L' },
-        ]
+            // { duration: '16n', time: `0:0:4`, hand: 'R' },
+            // { duration: '16n', time: `0:0:5`, hand: 'L' },
+            // { duration: '16n', time: `0:0:6`, hand: 'R' },
+            // { duration: '16n', time: `0:0:7`, hand: 'L' },
+        ],
+        timeSignature: [3, 8]
     },
     {
         title: 'Single Stroke Seven',
@@ -47,14 +49,15 @@ const rudiments = [
             { duration: '16n', time: `0:0:4`, hand: 'R' },
             { duration: '16n', time: `0:0:5`, hand: 'L' },
             { duration: '16n', time: `0:0:6`, hand: 'R' },
-            { duration: '16n', time: `0:0:7`, hand: 'R' },
-            { duration: '16n', time: `0:0:8`, hand: 'L' },
-            { duration: '16n', time: `0:0:9`, hand: 'R' },
-            { duration: '16n', time: `0:0:10`, hand: 'L' },
-            { duration: '16n', time: `0:0:11`, hand: 'R' },
-            { duration: '16n', time: `0:0:12`, hand: 'L' },
-            { duration: '16n', time: `0:0:13`, hand: 'R' },
-        ]
+            // { duration: '16n', time: `0:0:7`, hand: 'R' },
+            // { duration: '16n', time: `0:0:8`, hand: 'L' },
+            // { duration: '16n', time: `0:0:9`, hand: 'R' },
+            // { duration: '16n', time: `0:0:10`, hand: 'L' },
+            // { duration: '16n', time: `0:0:11`, hand: 'R' },
+            // { duration: '16n', time: `0:0:12`, hand: 'L' },
+            // { duration: '16n', time: `0:0:13`, hand: 'R' },
+        ],
+        timeSignature: [7, 8]
     },
     //EndRegion - Single Stroke Rudiments
     //Region - Drum Roll Rudiments
@@ -70,25 +73,27 @@ const rudiments = [
             { duration: '16n', time: `0:0:10`, hand: 'R' },
             { duration: '16n', time: `0:0:12`, hand: 'L' },
             { duration: '16n', time: `0:0:14`, hand: 'L' },
-        ]
+        ],
+        timeSignature: [4, 8]
     },
     {
         title: 'Triple Stroke Roll',
         description: 'With the single stroke roll you have one stroke per hand, with the double stroke roll two per hand, and with the triple stroke roll you play three alternating strokes. It’s very important for you to have a very solid knowledge of the single stroke and the double stroke roll drum rudiments before moving on to the triple stroke roll. They will help you master this one a lot quicker.',
         track: [
-            { duration: '16n', time: `0:0:0`, hand: 'R' },
-            { duration: '16n', time: `0:0:1`, hand: 'R' },
-            { duration: '16n', time: `0:0:2`, hand: 'R' },
-            { duration: '16n', time: `0:0:3`, hand: 'L' },
-            { duration: '16n', time: `0:0:4`, hand: 'L' },
-            { duration: '16n', time: `0:0:6`, hand: 'L' },
-            { duration: '16n', time: `0:0:7`, hand: 'R' },
-            { duration: '16n', time: `0:0:8`, hand: 'R' },
-            { duration: '16n', time: `0:0:9`, hand: 'R' },
-            { duration: '16n', time: `0:0:10`, hand: 'L' },
-            { duration: '16n', time: `0:0:11`, hand: 'L' },
-            { duration: '16n', time: `0:0:12`, hand: 'L' },
-        ]
+            { duration: '8n', time: `0:0:0`, hand: 'R' },
+            { duration: '8n', time: `0:0:1`, hand: 'R' },
+            { duration: '8n', time: `0:0:2`, hand: 'R' },
+            { duration: '8n', time: `0:0:3`, hand: 'L' },
+            { duration: '8n', time: `0:0:4`, hand: 'L' },
+            { duration: '8n', time: `0:0:5`, hand: 'L' },
+            { duration: '8n', time: `0:0:6`, hand: 'R' },
+            { duration: '8n', time: `0:0:7`, hand: 'R' },
+            { duration: '8n', time: `0:0:8`, hand: 'R' },
+            { duration: '8n', time: `0:0:9`, hand: 'L' },
+            { duration: '8n', time: `0:0:10`, hand: 'L' },
+            { duration: '8n', time: `0:0:11`, hand: 'L' },
+        ],
+        timeSignature: [12, 16]
     },
     //EndRegion - Drum Roll Rudiments
     //Region - Paradiddle Rudiments
@@ -104,7 +109,8 @@ const rudiments = [
             { duration: '16n', time: `0:0:10`, hand: 'R' },
             { duration: '16n', time: `0:0:12`, hand: 'L' },
             { duration: '16n', time: `0:0:14`, hand: 'L' },
-        ]
+        ],
+        timeSignature: [8, 8]
     },
     {
         title: 'Double Paradiddle',
@@ -122,7 +128,8 @@ const rudiments = [
             { duration: '16n', time: `0:0:9`, hand: 'R' },
             { duration: '16n', time: `0:0:10`, hand: 'L' },
             { duration: '16n', time: `0:0:11`, hand: 'L' },
-        ]
+        ],
+        timeSignature: [12, 16]
     },
     //EndRegion - Paradiddle Rudiments
 ];
