@@ -1,6 +1,6 @@
 <template>
-  <main>
-    <div>
+  <main class="d-flex flex-column justify-center align-center">
+    <div class="align-self-stretch">
       <v-select
         v-model="rudiment"
         :items="rudiments"
@@ -15,11 +15,11 @@
         class="mx-5"
       ></v-select>
     </div>
-    <v-container class="rudiment mx-5">
-      <v-row class="header">
-        <h1 class="header__title">{{ rudiment.title }}</h1>
-        <p class="header__description">{{ rudiment.description }}</p>
-      </v-row>
+    <div class="header align-self-stretch mx-8">
+      <h1 class="header__title">{{ rudiment.title }}</h1>
+      <p class="header__description">{{ rudiment.description }}</p>
+    </div>
+    <v-container class="rudiment">
       <v-container class="my-12">
         <v-row class="pattern">
           <hr class="pattern__line-vertical pattern__line-vertical--first"/>
@@ -89,8 +89,8 @@
         </v-btn>  
       </v-col>
     </v-container>
-    <v-btn @click="sound()" color="primary">Click</v-btn>
-    <v-btn @click="stop()" color="error">Stop</v-btn>
+    <!-- <v-btn @click="sound()" color="primary">Click</v-btn>
+    <v-btn @click="stop()" color="error">Stop</v-btn> -->
   </main>
 </template>
 
@@ -237,7 +237,7 @@ export default {
   }
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
   @import "@/assets/styles/_colors.scss";
 
   .header {
@@ -247,14 +247,15 @@ export default {
 
     &__title {
       color: $navy-blue;
+      font-size: 3em;
     }
 
     &__description {
       width: 60%;
       color: $red;
-      font-size: 0.8em;
+      font-size: 1em;
       font-weight: 400;
-      line-height: 16px;
+      line-height: 20px;
       padding-left: 8px;
     }
   }

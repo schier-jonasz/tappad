@@ -1,8 +1,8 @@
 <template>
   <main class="content">
-    <div>
-      <h1 class="ml-4">Metronome</h1>
-      <p class="ml-6 secondary--text font-weight-light"
+    <div class="header">
+      <h1 class="header__title ml-5">Metronome</h1>
+      <p class="header__description ml-7"
         color="primary">Enjoy the beat 😊🥁</p>
     </div>
     <v-btn 
@@ -160,10 +160,10 @@
           elevation="3"
           class="beat rounded-circle">
           <v-text-field
+            class="beat__input"
             v-model="setBpm"
             @input="validateBpm"
             type="number"
-            class="beat__input"
             ></v-text-field>
           <p class="beat__bpm">BPM</p>
         </v-card>
@@ -233,10 +233,8 @@
     },
     methods: {
       playStopMetronome() {
-        this.isPlaying = !this.isPlaying;
-        
+        this.isPlaying = !this.isPlaying; 
         this.isPlaying ? this.start() : this.stop();
-        // watch - https://indiebubbler.github.io/metro/
       },
       start() {
         let note = this.note + 'n';
@@ -326,7 +324,7 @@
   };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   @import "@/assets/styles/_colors.scss";
 
   .content {
@@ -336,6 +334,19 @@
       position: absolute;
       top: 72px;
       right: 24px;
+    }
+  }
+
+  .header {
+    &__title {
+      font-size: 4em;
+      color: $navy-blue;
+    }
+
+    &__description {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: $red;
     }
   }
 
@@ -353,8 +364,8 @@
       transform: translate(-50%, 0);
     }
 
-    &__input input {
-      text-align: center;
+    ::v-deep .v-input input {
+      text-align: center !important;
       font-size: 6em;
       overflow: visible;
       padding: 8px;
@@ -373,6 +384,7 @@
       color: grey;
     }
   }
+
 
   .metrum {
     
@@ -396,13 +408,13 @@
         width: 56px;        
       }
 
-      &__input * {
+      ::v-deep &__input * {
         margin: 0;
         text-align: center;
-        width: 72px;
+        width: 54px;
       }
 
-      &__input input {
+      ::v-deep &__input input {
         /* background-color: cyan; */
         box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
         padding: 8px 8px !important;
