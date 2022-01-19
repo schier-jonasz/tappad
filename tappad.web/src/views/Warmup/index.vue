@@ -32,6 +32,7 @@
         :thumb-size="24"
         thumb-label
         class="volume-slider"
+        v-model="setPlayerVolume"
       ></v-slider>
       <!-- End volume -->
       <!-- Start/stop button -->
@@ -55,6 +56,7 @@
       <v-row justify="center">
         <v-btn-toggle 
           v-model="selectedOption"
+          mandatory
           :color="colors.red">
         <v-btn value="time">
           SET YOUR TIME
@@ -68,8 +70,7 @@
       <v-row 
         class="flex-column mt-10" 
         justify="center" 
-        align="center"
-        v-if="selectedOption">
+        align="center">
           <p class="option-title">Range BPM</p>
           <div class="option-slider">
             <v-range-slider
@@ -78,7 +79,7 @@
               :min="minBpm"
               hide-details
               class="align-center"
-              :thumb-size="24"
+              :thumb-size="32"
               thumb-label
             >
               <template v-slot:prepend>
@@ -281,6 +282,8 @@
 
 <script>
  import colors from '@/assets/styles/_colors.scss';
+import { sounds } from '@/assets/js/exportSounds';
+import * as Tone from "tone";
 
 export default {
   name: "warmup",
@@ -296,11 +299,73 @@ export default {
     bpmStep: 20,
     warmupTime: 30,
     warmupStep: 5,
+    sounds,
+    tone: Tone,
+    transport: Tone.Transport,
+    regularTap: null,
+    setPlayerVolume: 100,
+    time: 0,
   }),
   components: {
   },
+  methods: {
+    playStopMetronome() {
+      this.isPlaying = !this.isPlaying; 
+      this.isPlaying ? this.start() : this.stop();
+    },
+    start() {
+      this.transport.bpm.value = 100;
+
+      console.log(this.transport.bpm);
+
+      this.createAudioPlayers(this.sounds[5].path);
+      this.toneLoop = this.createToneLoop();
+
+      this.tone.loaded().then(() => {
+        this.transport.start();
+        this.toneLoop.start(0);
+      });
+    },
+    stop() {
+        this.transport.stop();
+
+        this.toneLoop.stop(0);
+        this.toneLoop.dispose();
+
+        this.regularTap.stop();
+        this.regularTap.dispose();
+    },
+    createToneLoop() {
+      // this.regularTap = new Tone.Player(this.sounds[5].path).toDestination();
+
+      const loop = new Tone.Loop((time) => { 
+          this.regularTap.start(time);
+          console.log(time);
+          this.time = time;
+      });
+      return loop;
+    },
+    createAudioPlayers(regularTapPath) {
+      this.regularTap = new Tone.Player(regularTapPath).toDestination();
+      this.regularTap.volume.input.value = this.setPlayerVolume / 100;
+    },
+  },
   watch: {
-  }
+    setBpm(bpm) {
+      this.transport.bpm.value = bpm;
+    },
+    setPlayerVolume(volume) {
+      this.regularTap.volume.input.value = volume / 100;
+      this.accent.volume.input.value = volume / 100;
+    },
+    propertyComputed() {
+      if (this.time > 5) {
+        console.log('dziala xddddd');
+      }
+    }
+  },
+  computed: {
+  },
 };
 </script>
 <style lang="scss" scoped>

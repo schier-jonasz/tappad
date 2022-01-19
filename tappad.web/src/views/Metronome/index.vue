@@ -217,7 +217,6 @@
         transport: Tone.Transport,
         toneLoop: null,
         counter: 0,
-        playerVolume: 100,
         regularTap: null,
         accent: null,
         regularTapPath: sounds[0].path,
