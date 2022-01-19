@@ -446,11 +446,11 @@
     align-items: center;
   }
 
-  .volume-slider .v-input__slot {
+  ::v-deep .volume-slider .v-input__slot {
     margin: 0;
   }
 
-  .volume-slider .v-input__control .v-messages {
+  ::v-deep .volume-slider .v-input__control .v-messages {
     display: none;
   }
 
