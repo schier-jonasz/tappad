@@ -19,8 +19,22 @@
         <v-card 
           elevation="3"
           class="beat rounded-circle">
-          <p class="beat__value">120</p>
-          <p class="beat__bpm">BPM</p>
+          <p class="beat__value">{{ rangeBpm[0] }}</p>
+          <p class="beat__bpm">actual bpm</p>
+          <div 
+            class="beat__time-bar"
+            data-style="smooth"
+            >
+            <div 
+              class="beat__time-bar--in"
+              v-if="isPlaying"
+              :style="{
+              animationDuration: animationDuration
+              }"
+              :key="animationTrigger">
+            </div>
+          </div>
+          <p class="beat__time">TIME LEFT</p>
         </v-card>
       </v-col>
       <!-- End Metronome circle -->
@@ -45,8 +59,7 @@
           large
           :color="colors.red"
           @click="playStopMetronome()">
-          <v-icon v-if="!isPlaying">mdi-play</v-icon>
-          <v-icon v-else>mdi-pause</v-icon>
+          <v-icon>{{ isPlaying ? 'mdi-pause' : 'mdi-play' }}</v-icon>
         </v-btn>  
       </v-col>
       <!-- End start/stop button -->
@@ -126,7 +139,8 @@
                 small
                 :color="colors.blue"
                 style="color: white"
-                @click="warmupTime -= 5"
+                :disabled="warmupTime == 1 ? true : false"
+                @click="warmupTime--"
               >
                 <v-icon>
                   mdi-minus
@@ -144,7 +158,8 @@
                 small
                 :color="colors.blue"
                 style="color: white"
-                @click="warmupTime += 5"
+                :disabled="warmupTime == 120 ? true : false"
+                @click="warmupTime++"
               >
                 <v-icon>
                   mdi-plus
@@ -164,6 +179,7 @@
                 small
                 :color="colors.blue"
                 style="color: white"
+                :disabled="warmupStep == 1 ? true : false"
                 @click="warmupStep--"
               >
                 <v-icon>
@@ -182,6 +198,7 @@
                 small
                 :color="colors.blue"
                 style="color: white"
+                :disabled="warmupStep == 50 ? true : false"
                 @click="warmupStep++"
               >
                 <v-icon>
@@ -208,6 +225,7 @@
                 small
                 :color="colors.blue"
                 style="color: white"
+                :disabled="speedTime == 1 ? true : false"
                 @click="speedTime--"
               >
                 <v-icon>
@@ -246,6 +264,7 @@
                 small
                 :color="colors.blue"
                 style="color: white"
+                :disabled="bpmStep == 1 ? true : false"
                 @click="bpmStep--"
               >
                 <v-icon>
@@ -264,6 +283,7 @@
                 small
                 :color="colors.blue"
                 style="color: white"
+                :disabled="bpmStep == 599 ? true : false"
                 @click="bpmStep++"
               >
                 <v-icon>
@@ -283,6 +303,7 @@
 <script>
  import colors from '@/assets/styles/_colors.scss';
 import { sounds } from '@/assets/js/exportSounds';
+import { SELECTED_OPTION } from "./constants";
 import * as Tone from "tone";
 
 export default {
@@ -295,16 +316,21 @@ export default {
     maxBpm: 600,
     rangeBpm: [60, 120],
     satisfactionEmojis: ['👍', '😉','👌','😏','💪','👏','🤨','😶','😮','😲','😨','🤯','🔥'],
-    speedTime: 10,
+    speedTime: 2,
     bpmStep: 20,
-    warmupTime: 30,
+    warmupTime: 5,
     warmupStep: 5,
+    calculatedBpmStep: 0,
+    calculatedTimeStep: 0,
+    countStep: 0,
+    timeCheck: 0,
     sounds,
     tone: Tone,
     transport: Tone.Transport,
     regularTap: null,
     setPlayerVolume: 100,
     time: 0,
+    animationTrigger: false,
   }),
   components: {
   },
@@ -314,9 +340,7 @@ export default {
       this.isPlaying ? this.start() : this.stop();
     },
     start() {
-      this.transport.bpm.value = 100;
-
-      console.log(this.transport.bpm);
+      this.transport.bpm.value = this.rangeBpm[0];
 
       this.createAudioPlayers(this.sounds[5].path);
       this.toneLoop = this.createToneLoop();
@@ -337,34 +361,66 @@ export default {
     },
     createToneLoop() {
       // this.regularTap = new Tone.Player(this.sounds[5].path).toDestination();
-
-      const loop = new Tone.Loop((time) => { 
-          this.regularTap.start(time);
-          console.log(time);
-          this.time = time;
-      });
-      return loop;
+      this.calculateBpmStep();
+      this.calculateTimeStep();
+      this.timeCheck = this.calculatedTimeStep;
+      if (this.selectedOption === SELECTED_OPTION.TIME) {
+        return new Tone.Loop((time) => {
+        if (time > this.timeCheck) {        
+          this.countStep += 1;
+          this.timeCheck += this.calculatedTimeStep;
+          if (this.countStep < this.warmupStep) {
+            this.$set(this.rangeBpm, 0, this.rangeBpm[0] += this.calculatedBpmStep);
+            this.startTimer();
+          } else {
+            this.stop();
+            this.countStep = 0;
+          }
+        }
+        this.regularTap.start(time);
+        });
+      } else {
+        this.calculatedTimeStep = this.speedTimeToSeconds();
+        this.timeCheck = this.calculatedTimeStep;
+        return new Tone.Loop((time) => {
+        if (time > this.timeCheck && (this.rangeBpm[0] + this.bpmStep) <= this.rangeBpm[1]) {
+          this.timeCheck += this.calculatedTimeStep;
+          this.$set(this.rangeBpm, 0, this.rangeBpm[0] += this.bpmStep);
+          this.startTimer();
+        }
+        this.regularTap.start(time);
+        });
+      }
     },
     createAudioPlayers(regularTapPath) {
       this.regularTap = new Tone.Player(regularTapPath).toDestination();
       this.regularTap.volume.input.value = this.setPlayerVolume / 100;
     },
+    calculateBpmStep() {
+      this.calculatedBpmStep = Math.round((this.rangeBpm[1] - this.rangeBpm[0]) / this.warmupStep);
+    },
+    calculateTimeStep() {
+      this.calculatedTimeStep = Math.round((this.warmupTime * 60) / this.warmupStep);
+    },
+    speedTimeToSeconds() {
+      return this.speedTime * 60;
+    },
+    startTimer() {
+      this.animationTrigger = !this.animationTrigger;
+    }
   },
   watch: {
-    setBpm(bpm) {
-      this.transport.bpm.value = bpm;
+    rangeBpm(bpm) {
+      this.transport.bpm.value = bpm[0];
     },
     setPlayerVolume(volume) {
       this.regularTap.volume.input.value = volume / 100;
-      this.accent.volume.input.value = volume / 100;
     },
-    propertyComputed() {
-      if (this.time > 5) {
-        console.log('dziala xddddd');
-      }
-    }
   },
   computed: {
+    animationDuration () {
+      return `${this.calculatedTimeStep}s`
+    }
   },
 };
 </script>
@@ -393,7 +449,7 @@ export default {
     &__value {
       font-size: 6em;
       position: absolute;
-      top: 25%;
+      top: 10%;
       left: 50%;
       transform: translate(-50%, 0);
     }
@@ -402,13 +458,55 @@ export default {
       position: absolute;
       left: 50%;
       transform: translate(-50%, 0);
-      bottom: 10%;
+      bottom: 35%;
       text-transform: uppercase;
       font-size: 1.25em;
       font-weight: bold;
       color: grey;
     }
+
+    &__time-bar {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0);
+      padding: 4px;
+      border-radius: 16px;
+      bottom: 30%;
+      width: 80%;
+      background-color: #dd656e36;
+
+      &--in {
+        height: 10px;
+        background-color: $red;
+        border-radius: 16px;
+        animation-name: decreaseBarTimer;
+        animation-direction: linear forwards;
+        transform-origin: left center;
+      }
+    }
+
+    /* &__time-bar[data-style="smooth"] div {
+      animation-name: decreaseBarTimer;
+      animation-direction: linear forwards;
+    } */
+
+    &__time {
+      text-transform: uppercase;
+      font-size: 1.25em;
+      font-weight: bold;
+      color: grey;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0);
+      bottom: 10%;
+    }
   }
+
+  @keyframes decreaseBarTimer {
+  to {
+    transform: scaleX(0);
+  }
+}
 
   .volume-slider {
     width: 70%;
