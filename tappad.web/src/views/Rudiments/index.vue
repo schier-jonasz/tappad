@@ -21,7 +21,8 @@
     </div>
     <v-container class="rudiment">
       <v-container class="my-12">
-        <v-row class="pattern">
+        <v-row class="pattern"
+          v-if="rudiment.track">
           <hr class="pattern__line-vertical pattern__line-vertical--first"/>
           <hr class="pattern__line-vertical pattern__line-vertical--second"/>
           <hr class="pattern__line pattern__line--1"/>
@@ -30,12 +31,45 @@
           <hr class="pattern__line pattern__line--4"/>
           <hr class="pattern__line-vertical pattern__line-vertical--penultimate"/>
           <hr class="pattern__line-vertical pattern__line-vertical--last"/>
-          <v-col
-            class="pattern__hands"
-            v-for="(item, index) in rudiment.track"
-            :key="index">
-            {{item.hand}}
-          </v-col>
+          <!-- <transition-group name="hand-blink"> -->
+            <v-col
+              class="pattern__hands"
+              v-for="(item, index) in rudiment.track"
+              :key="item.time"
+              :data-index="index">
+              {{item.hand}}
+              <v-row
+                class="pattern__accent"
+                v-if="index % rudiment.accent == note - 1 && isAccentEnabled">
+                &gt;
+              </v-row>
+            </v-col>
+          <!-- </transition-group> -->
+        </v-row>
+        <v-row class="pattern"
+          v-else>
+          <hr class="pattern__line-vertical pattern__line-vertical--first"/>
+          <hr class="pattern__line-vertical pattern__line-vertical--second"/>
+          <hr class="pattern__line pattern__line--1"/>
+          <hr class="pattern__line pattern__line--2"/>
+          <hr class="pattern__line pattern__line--3"/>
+          <hr class="pattern__line pattern__line--4"/>
+          <hr class="pattern__line-vertical pattern__line-vertical--penultimate"/>
+          <hr class="pattern__line-vertical pattern__line-vertical--last"/>
+          <!-- <transition-group name="hand-blink"> -->
+            <v-col
+              class="pattern__hands"
+              v-for="(item, index) in rudiment.pattern[note - 1]"
+              :key="item.time"
+              :data-index="index">
+              {{item.hand}}
+              <v-row
+                class="pattern__accent"
+                v-if="index % rudiment.accent == note - 1 && isAccentEnabled">
+                &gt;
+              </v-row>
+            </v-col>
+          <!-- </transition-group> -->
         </v-row>
       </v-container>
       <v-container class="options">
@@ -54,11 +88,15 @@
           </v-col>
           <v-col class="d-flex justify-center align-center">
             <v-switch
+              v-model="isAccentEnabled"
+              :disabled="!rudiment.accent"
               label="Accent">
             </v-switch>
           </v-col>
           <v-col class="d-flex justify-center align-baseline">
             <v-text-field
+              v-model="note"
+              :disabled="!isAccentEnabled || !rudiment.accent"
               class="option__input"
               type="number"
             ></v-text-field>
@@ -91,6 +129,7 @@
     </v-container>
     <!-- <v-btn @click="sound()" color="primary">Click</v-btn>
     <v-btn @click="stop()" color="error">Stop</v-btn> -->
+    <v-btn @click="animate()" color="error">Animate</v-btn>
   </main>
 </template>
 
@@ -113,6 +152,8 @@ export default {
     transport: Tone.Transport,
     setPlayerVolume: 100,
     setBpm: 120,
+    note: 1,
+    isAccentEnabled: true,
   }),
   components: {
   },
@@ -143,16 +184,37 @@ export default {
     createTonePart() {
       const right = new Tone.Player(sounds[5].path).toDestination();
       const left = new Tone.Player(sounds[1].path).toDestination();
+      var i = 0;
+      if (this.rudiment.track) {
+        return new Tone.Part(((time, note) => {
+          // console.log(Tone.Transport.position, note.time);
+          this.triggerHandAnimation(i++)
+          i = i % this.rudiment.track.length;
 
-      const part = new Tone.Part(((time, note) => {
-        console.log(Tone.Transport.position, note.time);
-        if (note.hand == 'R') {
-          right.start(time)
-        } else {
-          left.start(time);
-        }
-      }), this.rudiment.track);
-      return part;
+          if (note.hand == 'R') {
+            right.start(time)
+          } else {
+            left.start(time);
+          }
+        }), this.rudiment.track);
+      } else {
+        return new Tone.Part(((time, note) => {
+          // console.log(Tone.Transport.position, note.time);
+          this.triggerHandAnimation(i++)
+          i = i % this.rudiment.pattern[this.note - 1].length;
+          if (note.hand == 'R') {
+            right.start(time)
+          } else {
+            left.start(time);
+          }
+        }), this.rudiment.pattern[this.note - 1]);
+      }
+    },
+    triggerHandAnimation(indexElement) {
+        const handElement = document.querySelector(`[data-index="${indexElement}"]`);
+        handElement.classList.remove('blink-and-bounce');
+        void handElement.offsetWidth;
+        handElement.classList.add('blink-and-bounce');
     },
     sound() {
       // const synth = new Tone.Synth().toDestination();
@@ -225,6 +287,9 @@ export default {
       Tone.Transport.start();
       part.start(0);
     },
+    animate() {
+      console.log(this.rudiment.pattern)
+    }
   },
   watch: {
     setBpm(bpm) {
@@ -264,7 +329,7 @@ export default {
     width: 45%;
   }
 
-  .option {
+  ::v-deep .option {
 
     &__input input {
         text-align: center;
@@ -335,7 +400,41 @@ export default {
 
     &__hands {
       font-size: 3em;
+      font-weight: bold;
       z-index: 1;
+      position: relative;
+    }
+
+    &__accent {
+      position: absolute;
+      font-weight: 400;
+      top: -10px;
+      left: 25px;
     }
   }
+
+.blink-and-bounce {
+  animation-name: blinkAndBounce;
+  animation-direction: linear;
+  animation-duration: 0.3s;
+}
+
+@keyframes blinkAndBounce {
+  0% {
+    color: #000;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  50% {
+    color: #FFD700;
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    color: #000;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>
