@@ -1,8 +1,8 @@
 <template>
   <main class="content">
-    <div>
-      <h1 class="ml-4">Metronome</h1>
-      <p class="ml-6 secondary--text font-weight-light"
+    <div class="header">
+      <h1 class="header__title ml-5">Metronome</h1>
+      <p class="header__description ml-7"
         color="primary">Enjoy the beat 😊🥁</p>
     </div>
     <v-btn 
@@ -10,6 +10,7 @@
       outlined
       icon
       large
+      :color="colors.red"
       @click="openSettings()">
         <v-icon>mdi-cog-outline</v-icon>
     </v-btn>
@@ -98,11 +99,17 @@
           </v-list-item-subtitle>
           <v-row aling="center">
             <v-col class="pt-5">
+              <Keypress :disabled="isPlaying" key-event="keyup" :key-code="32" @success="calculateTapBpm"/>
               <v-btn
                 :color="colors.blue"
-                outlined>
+                outlined
+                :disabled="isPlaying"
+                @click="calculateTapBpm()">
                 tap
               </v-btn>
+            </v-col>
+            <v-col class="tap-bpm pt-7 font-weight-bold" v-if="tapCounter > 2">
+              {{ tapBpm }}
             </v-col>
           </v-row>
         </v-container>
@@ -147,17 +154,16 @@
       </v-col>
       <!-- Metronome circle -->
       <v-col 
-        class="" 
         align="center"
         justify="center">
         <v-card 
           elevation="3"
           class="beat rounded-circle">
           <v-text-field
+            class="beat__input"
             v-model="setBpm"
             @input="validateBpm"
             type="number"
-            class="beat__input"
             ></v-text-field>
           <p class="beat__bpm">BPM</p>
         </v-card>
@@ -182,6 +188,7 @@
           outlined 
           icon 
           large
+          :color="colors.red"
           @click="playStopMetronome()">
           <v-icon v-if="!isPlaying">mdi-play</v-icon>
           <v-icon v-else>mdi-pause</v-icon>
@@ -197,8 +204,6 @@
   import { sounds } from '@/assets/js/exportSounds';
   import * as Tone from "tone";
 
-
-
   export default {
     name: "metronome",
     data: () => ({
@@ -212,7 +217,6 @@
         transport: Tone.Transport,
         toneLoop: null,
         counter: 0,
-        playerVolume: 100,
         regularTap: null,
         accent: null,
         regularTapPath: sounds[0].path,
@@ -220,15 +224,16 @@
         sounds,
         setPlayerVolume: 100,
         isAccentEnabled: true,
+        tapBpm: 0,
+        tapCounter: 0,
     }),
     components: {
+      Keypress: () => import('vue-keypress'),
     },
     methods: {
       playStopMetronome() {
-        this.isPlaying = !this.isPlaying;
-        
+        this.isPlaying = !this.isPlaying; 
         this.isPlaying ? this.start() : this.stop();
-        // watch - https://indiebubbler.github.io/metro/
       },
       start() {
         let note = this.note + 'n';
@@ -259,7 +264,6 @@
         this.accent.dispose();
 
         this.counter = 0;
-        this.rythm.stop();
       },
       createToneLoop() {
         const loop = new Tone.Loop((time) => { 
@@ -269,7 +273,6 @@
             this.regularTap.start(time);
           }
           this.counter++;     
-          console.log(60 / this.transport.bpm.value);
         });
         return loop;
       },
@@ -285,6 +288,7 @@
       },
       closeSettings() {
         this.settings = false;
+        this.tapCounter = 0;
       },
       validateBpm(value) {
         console.log(value.length); //TODO - validation bpm
@@ -295,6 +299,13 @@
       disabledRegularTap(item) {
         return item.path === this.accentPath;
       },
+      calculateTapBpm() {
+        this.tapCounter += 1;
+        let elapsedTime = Tone.Transport.seconds;
+        Tone.Transport.stop().start();
+        let bpm = (60 / elapsedTime).toFixed(0);
+        this.tapBpm = bpm;
+      }
     },
     watch: {
       setBpm(bpm) {
@@ -311,7 +322,9 @@
   };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+  @import "@/assets/styles/_colors.scss";
+
   .content {
     position: relative;
 
@@ -319,6 +332,19 @@
       position: absolute;
       top: 72px;
       right: 24px;
+    }
+  }
+
+  .header {
+    &__title {
+      font-size: 4em;
+      color: $navy-blue;
+    }
+
+    &__description {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: $red;
     }
   }
 
@@ -336,8 +362,8 @@
       transform: translate(-50%, 0);
     }
 
-    &__input input {
-      text-align: center;
+    ::v-deep .v-input input {
+      text-align: center !important;
       font-size: 6em;
       overflow: visible;
       padding: 8px;
@@ -356,6 +382,7 @@
       color: grey;
     }
   }
+
 
   .metrum {
     
@@ -379,13 +406,13 @@
         width: 56px;        
       }
 
-      &__input * {
+      ::v-deep &__input * {
         margin: 0;
         text-align: center;
-        width: 72px;
+        width: 54px;
       }
 
-      &__input input {
+      ::v-deep &__input input {
         /* background-color: cyan; */
         box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px;
         padding: 8px 8px !important;
@@ -417,11 +444,15 @@
     align-items: center;
   }
 
-  .volume-slider .v-input__slot {
+  ::v-deep .volume-slider .v-input__slot {
     margin: 0;
   }
 
-  .volume-slider .v-input__control .v-messages {
+  ::v-deep .volume-slider .v-input__control .v-messages {
     display: none;
+  }
+
+  .tap-bpm {
+    color: $navy-blue;
   }
 </style>

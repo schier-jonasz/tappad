@@ -34,7 +34,7 @@
               </v-list-item-content>
             </v-list-item>
             
-            <v-list-group
+            <!-- <v-list-group
               prepend-icon="mdi-playlist-music"
               v-model="collapse"
               @click="checkIfNarrow()">
@@ -53,7 +53,7 @@
                     <v-list-item-title class="ml-1">{{ subpage.title }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-            </v-list-group>
+            </v-list-group> -->
           </v-list>
         <div>
           <v-btn
@@ -80,14 +80,15 @@
           pages: [
               {title: 'Home', icon: 'mdi-home-city', path: '/'},
               {title: 'Metronome', icon: 'mdi-metronome', path: '/metronome'},
-              {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'}
+              {title: 'Warmup', icon: 'mdi-fire-circle', path: '/warmup'},
+              {title: 'Rudiments', icon: 'mdi-playlist-music', path: '/rudiments'}
           ],
-          rudiments: [
-            {title: 'Single stroke roll', icon: 'mdi-music-note', path: '/rudiments/single-stroke-roll'},
-            {title: 'Single stroke four', icon: 'mdi-music-note', path: '/rudiments/single-stroke-four'},
-            {title: 'Double stroke roll', icon: 'mdi-music-note', path: '/rudiments/double-stroke-roll'},
-            {title: 'Triple stroke roll', icon: 'mdi-music-note', path: '/rudiments/triple-stroke-roll'},
-          ],
+          // rudiments: [
+          //   {title: 'Single stroke roll', icon: 'mdi-music-note', path: '/rudiments/single-stroke-roll'},
+          //   {title: 'Single stroke four', icon: 'mdi-music-note', path: '/rudiments/single-stroke-four'},
+          //   {title: 'Double stroke roll', icon: 'mdi-music-note', path: '/rudiments/double-stroke-roll'},
+          //   {title: 'Triple stroke roll', icon: 'mdi-music-note', path: '/rudiments/triple-stroke-roll'},
+          // ],
           mini: true,
       }),
       methods: {
