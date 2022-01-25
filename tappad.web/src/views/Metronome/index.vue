@@ -305,7 +305,6 @@
         Tone.Transport.stop().start();
         let bpm = (60 / elapsedTime).toFixed(0);
         this.tapBpm = bpm;
-        console.log('BPM: ', bpm);
       }
     },
     watch: {

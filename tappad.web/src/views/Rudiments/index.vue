@@ -96,6 +96,9 @@
           <v-col class="d-flex justify-center align-baseline">
             <v-text-field
               v-model="note"
+              min="1"
+              :max="rudiment.accent"
+              @input="onInput(note)"
               :disabled="!isAccentEnabled || !rudiment.accent"
               class="option__input"
               type="number"
@@ -127,9 +130,6 @@
         </v-btn>  
       </v-col>
     </v-container>
-    <!-- <v-btn @click="sound()" color="primary">Click</v-btn>
-    <v-btn @click="stop()" color="error">Stop</v-btn> -->
-    <v-btn @click="animate()" color="error">Animate</v-btn>
   </main>
 </template>
 
@@ -151,9 +151,11 @@ export default {
     Tone,
     transport: Tone.Transport,
     setPlayerVolume: 100,
+    actualVolume: 0,
     setBpm: 120,
     note: 1,
     isAccentEnabled: true,
+    sounds,
   }),
   components: {
   },
@@ -167,6 +169,7 @@ export default {
       this.transport.bpm.value = this.setBpm;
       this.transport.timeSignature = this.rudiment.timeSignature;
 
+      this.createAudioPlayers(this.sounds[5].path, this.sounds[1].path);
       this.tonePart = this.createTonePart();
       this.tonePart.loop = true;
       
@@ -182,33 +185,43 @@ export default {
       this.tonePart.dispose();
     },
     createTonePart() {
-      const right = new Tone.Player(sounds[5].path).toDestination();
-      const left = new Tone.Player(sounds[1].path).toDestination();
       var i = 0;
       if (this.rudiment.track) {
         return new Tone.Part(((time, note) => {
           // console.log(Tone.Transport.position, note.time);
+          this.isAccentNow(i);
           this.triggerHandAnimation(i++)
           i = i % this.rudiment.track.length;
 
           if (note.hand == 'R') {
-            right.start(time)
+            this.rightTap.start(time)
           } else {
-            left.start(time);
+            this.leftTap.start(time);
           }
         }), this.rudiment.track);
       } else {
         return new Tone.Part(((time, note) => {
           // console.log(Tone.Transport.position, note.time);
+          this.isAccentNow(i);
           this.triggerHandAnimation(i++)
           i = i % this.rudiment.pattern[this.note - 1].length;
+          
           if (note.hand == 'R') {
-            right.start(time)
+            this.rightTap.start(time)
           } else {
-            left.start(time);
+            this.leftTap.start(time);
           }
         }), this.rudiment.pattern[this.note - 1]);
       }
+    },
+    createAudioPlayers(rightTapPath, leftTapPath) {
+      this.rightTap = new Tone.Player(rightTapPath).toDestination();
+      this.rightTap.volume.input.value = this.setPlayerVolume / 100;
+
+      this.leftTap = new Tone.Player(leftTapPath).toDestination();
+      this.leftTap.volume.input.value = this.setPlayerVolume / 100;
+
+      this.actualVolume = this.setPlayerVolume / 100;
     },
     triggerHandAnimation(indexElement) {
         const handElement = document.querySelector(`[data-index="${indexElement}"]`);
@@ -272,8 +285,6 @@ export default {
       Tone.Transport.timeSignature = [7, 8];
 
       const part = new Tone.Part(((time, note) => {
-        console.log(Tone.Transport.position, note.time);
-        
         if (note.hand == 'R') {
           right.start(time)
         } else {
@@ -287,8 +298,20 @@ export default {
       Tone.Transport.start();
       part.start(0);
     },
-    animate() {
-      console.log(this.rudiment.pattern)
+    onInput(note) {
+      if (note == '' || note > this.rudiment.accent) {
+        this.note = 1;
+        note = 1;
+      }
+    },
+    isAccentNow(index) {
+      if (index % this.rudiment.accent == this.note - 1 && this.isAccentEnabled) {
+        this.rightTap.volume.input.value *= 2.5;
+        this.leftTap.volume.input.value *= 2.5;
+      } else {
+        this.rightTap.volume.input.value = this.actualVolume;
+        this.leftTap.volume.input.value = this.actualVolume;
+      }
     }
   },
   watch: {
@@ -298,7 +321,11 @@ export default {
     setPlayerVolume(volume) {
       this.rightTap.volume.input.value = volume / 100;
       this.leftTap.volume.input.value = volume / 100;
+      this.actualVolume = volume / 100;
     },
+  },
+  async created() {
+      await Tone.start();
   }
 };
 </script>
@@ -403,36 +430,34 @@ export default {
       font-weight: bold;
       z-index: 1;
       position: relative;
+      color: $navy-blue;
     }
 
     &__accent {
       position: absolute;
       font-weight: 400;
       top: -10px;
-      left: 25px;
+      left: 24px;
     }
   }
 
 .blink-and-bounce {
   animation-name: blinkAndBounce;
   animation-direction: linear;
-  animation-duration: 0.3s;
+  animation-duration: 0.1s;
 }
 
 @keyframes blinkAndBounce {
   0% {
-    color: #000;
-    opacity: 1;
+    color: $navy-blue;
     transform: translateY(0);
   }
   50% {
-    color: #FFD700;
-    opacity: 0;
-    transform: translateY(-8px);
+    color: $gold;
+    transform: translateY(-4px);
   }
   100% {
-    color: #000;
-    opacity: 1;
+    color: $navy-blue;
     transform: translateY(0);
   }
 }

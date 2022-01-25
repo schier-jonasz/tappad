@@ -422,6 +422,9 @@ export default {
       return `${this.calculatedTimeStep}s`
     }
   },
+  async created() {
+      await Tone.start();
+  },
 };
 </script>
 <style lang="scss" scoped>
